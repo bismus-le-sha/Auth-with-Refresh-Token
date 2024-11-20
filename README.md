@@ -1,16 +1,50 @@
-# flutter_refresh_token
+# Flutter Authentication with Refresh Token
 
-A new Flutter project.
+## Overview
+This Flutter project demonstrates handling authentication processes such as login, signup, OTP verification, and automatic token refresh using the [Dio HTTP client](https://pub.dev/packages/dio), with secure storage management using [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage).
 
-## Getting Started
+## Features
+- User Authentication (Login, Signup)
+- OTP Verification
+- Automatic Token Refresh using Interceptors
+- Secure Token Storage
 
-This project is a starting point for a Flutter application.
+## Usage
 
-A few resources to get you started if this is your first Flutter project:
+### Authentication
+- **Login**: Use `ApiService().login(email, password)` to authenticate users.
+- **Signup**: Use `ApiService().signUp(name, email, password)` to register new users.
+- **Verify OTP**: Use `ApiService().verifyOtp(email, otp)` for OTP verification.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Token Management
+- **Securely Store Tokens**: Use `SecureStorageManager.writeData('accessToken', token)` to store tokens securely.
+- **Read Tokens**: Use `SecureStorageManager.readData('accessToken')` to retrieve tokens securely.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Secure API Requests
+Ensure all API requests are authenticated using the access token retrieved from secure storage:
+```dart
+Future<Response> getProductByToken() async {
+  final token = await SecureStorageManager.readData('accessToken');
+  final response = await Dio().get('/product/1',
+      options: Options(headers: {'Authorization': 'Bearer $token'}));
+  return response;
+}
+```
+## Handling Token Expiry
+
+The `RefreshTokenInterceptor` automatically handles token expiration by refreshing the token and retrying the original request seamlessly when encountering 401 or 403 errors.
+
+intain secure sessions across multiple services or APIs.
+
+
+## Contribution
+
+Contributions to the project are welcome! Please fork the repository and submit a pull request with your features or fixes.
+
+## Issues
+
+If you encounter any issues while using this project, please open an issue in the repository with a detailed description of the problem, steps to reproduce it, and the expected behavior. We appreciate your contributions to improving this project.
+
+## Contact
+
+For any questions or feedback, please reach out via email: [mahmoudelsayed.dev@gmail.com](mahmoudelsayed.dev@gmail.com)
