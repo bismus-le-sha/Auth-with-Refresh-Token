@@ -25,7 +25,7 @@ Ensure all API requests are authenticated using the access token retrieved from 
 ```dart
 Future<Response> getProductByToken() async {
   final token = await SecureStorageManager.readData('accessToken');
-  final response = await Dio().get('/product/1',
+  final response = await _dio.get('/product/1',
       options: Options(headers: {'Authorization': 'Bearer $token'}));
   return response;
 }
