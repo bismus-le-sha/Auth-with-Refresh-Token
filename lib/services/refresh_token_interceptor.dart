@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_refresh_token/services/api_service.dart';
+import 'package:flutter_refresh_token/services/token_refresher.dart';
 import 'secure_storage_service.dart';
 
 class RefreshTokenInterceptor extends Interceptor {
@@ -33,15 +34,18 @@ class RefreshTokenInterceptor extends Interceptor {
       }
 
       try {
-        final newAccessToken = await _api.refreshToken(refreshToken);
-        RequestOptions retryOptions = err.requestOptions
+        final newAccessToken =
+            await TokenRefresher.refreshToken(_api, refreshToken);
+        if (newAccessToken == null) {
+          handler.next(err);
+          return;
+        }
+
+        // retry original request
+        final retryOptions = err.requestOptions
           ..headers['Authorization'] = 'Bearer $newAccessToken';
-        _dio.fetch(retryOptions).then((response) => handler.resolve(response),
-            onError: (e) {
-          handler.next(DioException(
-              requestOptions: retryOptions,
-              error: 'Retry with new token failed'));
-        });
+        final response = await _dio.fetch(retryOptions);
+        handler.resolve(response);
       } catch (e) {
         await SecureStorageManager.clearAllData();
         handler.next(err);
